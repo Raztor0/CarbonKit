@@ -44,9 +44,13 @@
         [self addSubview:self.indicator];
 
         // Support RTL
-        if ([UIApplication sharedApplication].userInterfaceLayoutDirection ==
-                UIUserInterfaceLayoutDirectionRightToLeft &&
-            [self respondsToSelector:@selector(semanticContentAttribute)]) {
+#       if !defined(CARBONKIT_APP_EXTENSIONS)
+        BOOL isRightToLeftLayout = [[UIApplication sharedApplication] userInterfaceLayoutDirection] == UIUserInterfaceLayoutDirectionRightToLeft;
+#       else
+        // App Extensions may not access -[UIApplication sharedApplication]; fall back to checking the bundle's preferred localization character direction
+        BOOL isRightToLeftLayout = [NSLocale characterDirectionForLanguage:[[NSBundle mainBundle] preferredLocalizations][0]] == NSLocaleLanguageDirectionRightToLeft;
+#       endif /* !defined(CARBONKIT_APP_EXTENSIONS) */
+        if (isRightToLeftLayout && [self respondsToSelector:@selector(semanticContentAttribute)]) {
             self.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft;
             self.indicator.semanticContentAttribute = UISemanticContentAttributeForceRightToLeft;
         }
